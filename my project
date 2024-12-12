@@ -1,1 +1,108 @@
+import re
+
+# FileProcessor class to handle File I/O
+class FileProcessor:
+    def __init__(self, filename):
+        self.filename = filename
+
+    def read_file(self):
+        """Reads content from the file."""
+        try:
+            with open(self.filename, 'r') as file:
+                return file.read()
+        except FileNotFoundError:
+            raise FileNotFoundError("File not found. Please check the filename.")
+
+    def write_file(self, content, output_filename="output.txt"):
+        """Writes content to a file."""
+        with open(output_filename, 'w') as file:
+            file.write(content)
+
+# TextAnalyzer class to demonstrate regex and OOP
+class TextAnalyzer:
+    def __init__(self, text):
+        self.text = text
+
+    def find_all_emails(self):
+        """Finds all email addresses in the text using regex."""
+        return re.findall(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}', self.text)
+
+    def count_words(self):
+        """Counts the total number of words in the text."""
+        return len(re.findall(r'\b\w+\b', self.text))
+
+    def find_urls(self):
+        """Finds all URLs in the text using regex."""
+        return re.findall(r'https?://[^\s]+', self.text)
+
+# Inheriting TextAnalyzer for additional functionality
+class AdvancedTextAnalyzer(TextAnalyzer):
+    def __init__(self, text):
+        super().__init__(text)
+
+    def find_dates(self):
+        """Finds dates in the format DD/MM/YYYY."""
+        return re.findall(r'\b\d{2}/\d{2}/\d{4}\b', self.text)
+
+    def word_frequency(self):
+        """Calculates word frequency in the text."""
+        words = re.findall(r'\b\w+\b', self.text.lower())
+        frequency = {}
+        for word in words:
+            frequency[word] = frequency.get(word, 0) + 1
+        return frequency
+
+# Testing the application
+def main():
+    # File I/O demonstration
+    input_file = "example.txt"
+    output_file = "analysis_output.txt"
+
+    try:
+        file_processor = FileProcessor(input_file)
+        text = file_processor.read_file()
+    except FileNotFoundError as e:
+        print(e)
+        return
+
+    # Analyze text using regex and OOP
+    analyzer = AdvancedTextAnalyzer(text)
+    emails = analyzer.find_all_emails()
+    urls = analyzer.find_urls()
+    dates = analyzer.find_dates()
+    word_count = analyzer.count_words()
+    word_freq = analyzer.word_frequency()
+
+    # Display results
+    results = (
+        f"Word Count: {word_count}\n"
+        f"Emails Found: {emails}\n"
+        f"URLs Found: {urls}\n"
+        f"Dates Found: {dates}\n"
+        f"Word Frequency: {word_freq}\n"
+    )
+    print(results)
+
+    # Write results to a file
+    file_processor.write_file(results, output_file)
+    print(f"Analysis written to {output_file}")
+
+# Test cases for demonstrating functionality
+def test():
+    sample_text = """
+    Hello! Contact us at example@mail.com or visit https://example.com. 
+    Our meeting is scheduled on 15/09/2024. Another email: test123@domain.org
+    """
+    analyzer = AdvancedTextAnalyzer(sample_text)
+
+    assert analyzer.count_words() == 21, "Word count failed"
+    assert analyzer.find_all_emails() == ['example@mail.com', 'test123@domain.org'], "Email extraction failed"
+    assert analyzer.find_urls() == ['https://example.com'], "URL extraction failed"
+    assert analyzer.find_dates() == ['15/09/2024'], "Date extraction failed"
+
+    print("All tests passed!")
+
+if __name__ == "__main__":
+    main()
+    test()
 
